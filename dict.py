@@ -5,47 +5,35 @@
 # Perform the marking closure.
 # Iterate until all words are marked
 
-from typing import Generator, Set, Union
+import re
+from typing import Any, Generator, Set, Union
 
-from graph import Graph, Node
+import jsonloader
+from graph import Graph, Node, unmarked
 
-input: Graph[str] = Graph()
-input.to('the', 'bible')
-input.to('book', 'bible')
+input: Graph[str] = jsonloader.load()
 
 result: Set[str] = set()
 
-def mark_all_zero_fanin(g: Graph[str]) -> None:
-    # Mark all fanin0 and add to result.
-    for n in g:
-        if not n.marked and n.fanin() == 0:
-            result.add(n.get())
-            n.mark()
-    
-    # While we encounter unamrked parents, mark them.
-    while g:
-        encountered = False
-        for n in g:
-            if not n.marked and n.unmarked_fanin() == 0:
-                n.mark()
-                encountered = True
-        if not encountered:
-            break
+def unmarked_fanout(n: Node[str]) -> int:
+    return len(list(filter(unmarked, n.to)))
 
-def highest_unmarked_fanout(g: Graph[str]) -> Union[Node[str], None]:
-    gen: Generator[Node[str]] = (n for n in g if not n.marked)
-    return max(gen, default = None, key = lambda n: n.fanout())
+while input.unmarked:
+    print(f"Size: {len(input.unmarked)}")
+    # Find the one with the highest fanout.
+    n: Node[str] = max(input.unmarked, key = unmarked_fanout)
 
-# mark all zero fanin recursively.
-# Graph the largest fanout and add it, marking it.
-# Remove elements from loops.
-# Do until graph empty.
+    result.add(n.t)
 
-mark_all_zero_fanin(input)
+    # Take the marking closure.
+    to_mark: Set[Node[str]] = {n}
+    while to_mark:
+        n: Node[str] = to_mark.pop()
 
-while list((n for n in input if not n.marked)):
-    mx = highest_unmarked_fanout(input)
-    result.add(mx.get())
-    mx.mark()
+        input.mark(n)
 
-print(result)
+        to_mark.update(filter(unmarked, n.to))
+
+with open("output.txt", "w") as out:
+    for word in result:
+        out.write(f"{word}\n")
