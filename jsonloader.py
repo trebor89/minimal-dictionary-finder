@@ -13,5 +13,5 @@ def load() -> Graph[str]:
         for def_word in re.split(r"['\"-().;, ]", df):
             if def_word in js:
                 res.to(def_word.lower(), word.lower())
-        res.get(word)
+        res.get(word.lower())
     return res
