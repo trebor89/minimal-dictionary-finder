@@ -19,7 +19,8 @@ clean_conversions: List[Tuple[str, str]] = [
     (r'tting$', 't'),
     (r'ing$', 'e'),
     (r'ing$', ''),
-    (r'e$', '')
+    (r'e$', ''),
+    (r'ive$', '')
 ]
 
 hyphenations: List[str] = [
@@ -69,10 +70,6 @@ def load() -> Graph[str]:
             def_word: str = def_word.lower()
 
             clean_def_words = clean_def_word(res, def_word)
-
-            if word == 'coinquinate':
-                print(df)
-                print(clean_def_words)
 
             for clean in clean_def_words:
                 if clean in res.all:
