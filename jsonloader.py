@@ -14,6 +14,6 @@ def load() -> Graph[str]:
 
     for (word, df) in js.items():
         for def_word in re.findall(r"[a-zA-Z]+[-a-zA-Z]*", df):
-            if def_word in res.all:
+            if def_word.lower() in res.all:
                 res.to(def_word.lower(), word.lower())
     return res
