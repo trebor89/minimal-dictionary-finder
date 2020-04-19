@@ -8,24 +8,28 @@ from graph import Graph
 
 # Ordered list for priority's sake.
 clean_conversions: List[Tuple[str, str]] = [
-    (r'-bearing', ''),
-    (r'-shaped$', ''),
     (r'like$', ''),
     (r'ness$', ''),
-    (r'^non-', ''),
     (r'^un', ''),
     (r's$', ''),
     (r'ly$', ''),
+    (r'ed$', 'e'),
     (r'ed$', ''),
     (r'al$', ''),
+    (r'tting$', 't'),
     (r'ing$', 'e'),
     (r'ing$', ''),
+    (r'e$', '')
 ]
 
-def clean_def_word(g: Graph[str], def_word: str) -> str:
-    if def_word in g:
-        return def_word
+hyphenations: List[str] = [
+    r'^even-',
+    r'-bearing$',
+    r'-shaped$',
+    r'^non-'
+]
 
+def clean_non_hyphenated(g: Graph[str], def_word: str) -> str:
     matched: bool = True
     while matched:
         matched = False
@@ -39,6 +43,18 @@ def clean_def_word(g: Graph[str], def_word: str) -> str:
 
     return def_word
 
+def clean_def_word(g: Graph[str], def_word: str) -> List[str]:
+    if def_word in g:
+        return [def_word]
+    
+    for hyph in hyphenations:
+        def_word = re.sub(hyph, '', def_word)
+
+    # Split on hyphens, removing words that are already in.
+    dehyphenated = def_word.split("-")
+
+    return [clean_non_hyphenated(g, s) for s in dehyphenated]
+
 def load() -> Graph[str]:
     res = Graph()
 
@@ -50,13 +66,15 @@ def load() -> Graph[str]:
     for (word, df) in js.items():
         word = word.lower()
         for def_word in re.findall(r"[a-zA-Z]+[-a-zA-Z]*", df):
-            def_word = def_word.lower()
+            def_word: str = def_word.lower()
 
-            def_word = clean_def_word(res, def_word)
+            clean_def_words = clean_def_word(res, def_word)
 
-            # if word == 'amygdaliferous':
-            #     print(df)
+            if word == 'coinquinate':
+                print(df)
+                print(clean_def_words)
 
-            if def_word in res.all:
-                res.to(def_word.lower(), word.lower())
+            for clean in clean_def_words:
+                if clean in res.all:
+                    res.to(clean, word)
     return res
