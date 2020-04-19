@@ -10,6 +10,9 @@ class Node(Generic[T]):
         self.necessary: bool = True
         self.to: Set[Node[T]] = set()
     
+    def __str__(self) -> str:
+        return f"{self.t}: {[n.t for n in self.to]}"
+    
     def get(self) -> T:
         return self.t
 
@@ -19,6 +22,9 @@ class Graph(Generic[T]):
     
     def __iter__(self) -> Iterator[Node[T]]:
         return iter(self.all.values())
+
+    def __contains__(self, item: T):
+        return item in self.all
     
     def get(self, t: T) -> Node[T]:
         if t not in self.all:
