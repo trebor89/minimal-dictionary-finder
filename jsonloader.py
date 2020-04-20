@@ -67,7 +67,7 @@ def load() -> Graph[str]:
     for (word, df) in js.items():
         word = word.lower()
         for def_word in re.findall(r"[a-zA-Z]+[-a-zA-Z]*", df):
-            def_word: str = def_word.lower()
+            def_word = def_word.lower()
 
             clean_def_words = clean_def_word(res, def_word)
 
